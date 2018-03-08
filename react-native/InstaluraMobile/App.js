@@ -12,33 +12,46 @@ import {
   ScrollView,
   View,
   Image,
-  Dimensions
+  Dimensions,
+  FlatList
 } from 'react-native';
+
+import Post from './components/Post';
 
 const width = Dimensions.get('screen').width;
 
 type Props = {};
 export default class App extends Component<Props> {
-  render() {
-    const fotos = [
-      {id: 1, usuario: 'rafael'},
-      {id: 2, usuario: 'alberto'},
-      {id: 3, usuario: 'guilherme'}
-    ];
+  
+  constructor() {
+    super();
+    this.state = {
+      fotos: []
+    }
+  }
 
+  // Faz a requisição pro servidor quando o componente carregar
+  componentDidMount() {
+    fetch('https://instalura-api.herokuapp.com/api/public/fotos/rafael')
+      .then(resposta => resposta.json())
+      .then(json => this.setState({fotos: json})) // seta o estado do componente
+  }
+  
+  render() {
     return (
-      <ScrollView style={{marginTop: 20}}>
-        {fotos.map(foto =>
-          <View key={foto.id}>
-            <Text>{foto.usuario}</Text>
-            <Image
-              source={require('./resources/img/alura.jpg')} 
-              style={{width: width, height: width}}
-            />
-          </View>
-        )}
-      </ScrollView>
+      <FlatList style={styles.container}
+        keyExtractor={item => String(item.id)}
+        data={this.state.fotos}
+        renderItem={({ item }) =>
+          <Post foto={item} />
+        }
+      />
     );
   }
 }
 
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 20
+  }
+});
